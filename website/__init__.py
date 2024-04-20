@@ -5,7 +5,7 @@ import os
 
 app=Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@hostname:port/database_name'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://flaskuser:flaskpwd@localhost:5432/flaskdb'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 app.config['SECRET_KEY'] = os.urandom(24)
