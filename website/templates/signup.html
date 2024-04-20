@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Include Fluent UI CSS here if necessary -->
+    <link rel="stylesheet" href="path/to/fluentui.css">
+    <!-- Include your own custom styles if necessary -->
+    <!-- <link rel="stylesheet" href="path/to/custom.css"> -->
+    <style>
+        .root {
+    height: 80%;
+    width: 60%;
+    background-color: #ffffff;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+    margin: 5% 18% 5% 18%;
+    padding: 2%;
+    gap: 32px;
+}
+
+.header {
+    height: 10%;
+}
+
+.h2 {
+    height: 24px;
+    margin: 0;
+}
+
+.p {
+    height: 20px;
+    width: 100%;
+    margin: 0;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    flex: 1;
+}
+
+.formContainer {
+    width: 100%;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.button {
+    margin: 5% 0%;
+    background-color: #0078d4;
+    border-color: #0078d4;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.16);
+}
+
+.card {
+    padding: 2% 10%;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.16);
+    align-items: center;
+}
+
+.success {
+    background-color: #dfffdf;
+    color: #107c10;
+}
+
+.error {
+    background-color: #fde7e7;
+    color: #a80000;
+}
+
+    </style>
+</head>
+<body>
+    <div class="root">
+        <div class="body">
+            <div class="header">
+                <h2>Welcome!</h2>
+                <p>Log in to get started</p>
+            </div>
+            <div class="formContainer" method="post">
+                <form>
+                    <div class="form">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                        <!-- Add validation messages here if necessary -->
+                        
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                        <!-- Add validation messages here if necessary -->
+                        
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                        <!-- Add validation messages here if necessary -->
+                        
+                        <button type="submit">Log in</button>
+                        <!-- Add error message here if necessary -->
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div>
+            <img alt="signup image" src="https://images.unsplash.com/photo-1484242857719-4b9144542727?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1280&q=80" height="600" width="700">
+        </div>
+    </div>
+</body>
+</html>
