@@ -1,4 +1,4 @@
-from flask import render_template, url_for, redirect, request, session
+from flask import render_template, url_for, redirect, request, session,jsonify
 from website import app
 import psycopg2
 
@@ -60,7 +60,33 @@ def login():
 
 @app.route('/<int:studentId>/dashboard')
 def dashboard(studentId):
-    return render_template('dashboard.html',studentId=studentId)
+    conn=db_conn()
+    cur = conn.cursor()
+    if request.method == 'GET':
+        cur.execute("SELECT courseid FROM course_progress WHERE studentid = %s", (studentId,))
+        enrolled_course_ids = [row[0] for row in cur.fetchall()]
+
+        print(enrolled_course_ids)
+
+        # Fetch the enrolled courses
+        if enrolled_course_ids != []:
+            cur.execute("SELECT * FROM course WHERE id IN %s", (tuple(enrolled_course_ids),))
+            enrolled_courses = cur.fetchall()
+            cur.execute("SELECT * FROM course WHERE id NOT IN %s", (tuple(enrolled_course_ids),))
+            not_enrolled_courses = cur.fetchall()
+        else:
+            enrolled_courses = []
+            cur.execute("SELECT * FROM course")
+            not_enrolled_courses = cur.fetchall()        
+
+        print(not_enrolled_courses)
+
+        return render_template('dashboard.html',studentId=studentId,enrolled_courses=enrolled_courses,not_enrolled_courses=not_enrolled_courses)
+    
+    return render_template('dashboard.html',studentId=studentId,enrolled_courses=enrolled_courses,not_enrolled_courses=not_enrolled_courses)
+
+
+
 
 @app.route('/')
 def home():
