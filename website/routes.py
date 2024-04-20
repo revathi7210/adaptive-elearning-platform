@@ -30,13 +30,36 @@ def signup():
         if data1 != None or data2 != None:
             return "Username or email already exists. Please choose another one."
         
-        cur.execute(f'''INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", ('{email}', '{password}','{username}');''')
-        # getStudentId = f'''Select id from student where email='{email}' and username='{username}';'''
-        # cur.execute(getStudentId)
-        # data = cur.fetchall()[0]
-        return redirect(url_for('home'))
+        cur.execute("INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", (email, password,username))
+        conn.commit()
+        return redirect(url_for('login'))
 
     return render_template("signup.html")
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+    conn=db_conn()
+    cur = conn.cursor()
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        getStudentId = f'''Select * from student where username='{username}';'''
+        cur.execute(getStudentId)
+        data = cur.fetchall()[0]
+        
+        studentid=data[0]
+        pwd=data[2]
+        #print (studentid, pwd)
+        if studentid == None :
+            return "User account Does not exist. Please create."
+        else :
+            if password != pwd :
+                return "Incorrect password."
+            else :
+                return redirect(url_for('home'))
+
+    return render_template("login.html")
 
 @app.route('/home')
 def home():
