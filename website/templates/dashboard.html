@@ -16,7 +16,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             grid-gap: 100px;
-            /* Increased spacing between the cards */
             justify-items: center;
             padding: 20px;
         }
@@ -63,7 +62,7 @@
     </style>
 </head>
 
-<body>
+<body id="dashboard" data-studentId="{{ studentId }}">
     <div class="main">
         <div>
             <h2>On-going Courses</h2>
@@ -90,6 +89,49 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the studentId from the data attribute
+            var studentId = document.getElementById('dashboard').getAttribute('data-studentId');
+    
+            // Add event listeners to the buttons
+            var continueButtons = document.querySelectorAll('.continue-button');
+            continueButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var courseId = button.getAttribute('data-course-id');
+                    sendToBackend(studentId, courseId);
+                    window.location.href=`/course` // Pass studentId to sendToBackend function
+                });
+            });
+    
+            var enrollButtons = document.querySelectorAll('.enroll-button');
+            enrollButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var courseId = button.getAttribute('data-course-id');
+                    sendToBackend(studentId, courseId);
+                    window.location.href=`/course` // Pass studentId to sendToBackend function
+                });
+            });
+    
+            function sendToBackend(studentId, courseId) {
+                // Make an AJAX request to your Flask endpoint
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', `/${studentId}/dashboard`);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        console.log('Data sent successfully');
+                        // Optionally, handle the response from the server
+                    } else {
+                        console.log('Error:', xhr.statusText);
+                    }
+                };
+                xhr.send(JSON.stringify({ courseId: courseId }));
+            }
+        });
+    </script>
+    
 
 
 </body>

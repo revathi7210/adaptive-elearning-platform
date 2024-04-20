@@ -58,15 +58,13 @@ def login():
 
     return render_template("login.html")
 
-@app.route('/<int:studentId>/dashboard')
+@app.route('/<int:studentId>/dashboard',methods=['GET','POST'])
 def dashboard(studentId):
     conn=db_conn()
     cur = conn.cursor()
     if request.method == 'GET':
         cur.execute("SELECT courseid FROM course_progress WHERE studentid = %s", (studentId,))
         enrolled_course_ids = [row[0] for row in cur.fetchall()]
-
-        print(enrolled_course_ids)
 
         # Fetch the enrolled courses
         if enrolled_course_ids != []:
@@ -79,14 +77,24 @@ def dashboard(studentId):
             cur.execute("SELECT * FROM course")
             not_enrolled_courses = cur.fetchall()        
 
-        print(not_enrolled_courses)
-
         return render_template('dashboard.html',studentId=studentId,enrolled_courses=enrolled_courses,not_enrolled_courses=not_enrolled_courses)
-    
-    return render_template('dashboard.html',studentId=studentId,enrolled_courses=enrolled_courses,not_enrolled_courses=not_enrolled_courses)
+    elif request.method == 'POST':
+
+        data = request.json
+
+        # Access the course ID
+        course_id = data.get('courseId')
+
+        # Process the course ID as needed
+        print("Received course ID:", course_id)
+       
+        return redirect(url_for('course'))
 
 
-
+@app.route('/course',methods=['GET','POST'])
+def course():
+    if request.method == 'GET':
+        return render_template('course.html')
 
 @app.route('/')
 def home():
