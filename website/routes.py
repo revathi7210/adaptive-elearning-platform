@@ -15,17 +15,14 @@ def signup():
         password = request.form['password']
         email = request.form['email']
 
-        print(username)
-
+        
         selectExistingUserQuery = f'''SELECT * from student where username='{username}';'''
-        print(selectExistingUserQuery)
         cur.execute(selectExistingUserQuery)
         data1 = cur.fetchone()
-        print(data1)
         selectExistingEmailQuery = f'''SELECT * from student where email='{email}';'''
         cur.execute(selectExistingEmailQuery)
         data2 = cur.fetchone()
-        print(data2)
+        
         
         if data1 != None or data2 != None:
             return "Username or email already exists. Please choose another one."
@@ -52,17 +49,19 @@ def login():
         pwd=data[2]
         #print (studentid, pwd)
         if studentid == None :
-            return "User account Does not exist. Please create."
+            return "User account Does not exist. Please Signup."
         else :
             if password != pwd :
                 return "Incorrect password."
             else :
-                return redirect(url_for('home'))
+                return redirect(url_for('home', id=studentid))
 
     return render_template("login.html")
 
 @app.route('/home')
 def home():
+    studentid=request.args.get('id')
+    
     return render_template('home.html')
 
 @app.route('/')
