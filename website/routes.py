@@ -43,7 +43,7 @@ def login():
 
         getStudentId = f'''Select * from student where username='{username}';'''
         cur.execute(getStudentId)
-        data = cur.fetchall()[0]
+        data = cur.fetchone()
         
         studentid=data[0]
         pwd=data[2]
@@ -54,22 +54,14 @@ def login():
             if password != pwd :
                 return "Incorrect password."
             else :
-                return redirect(url_for('home', id=studentid))
+                return redirect(url_for('dashboard',studentId=studentid))
 
     return render_template("login.html")
 
-@app.route('/home')
-def home():
-    studentid=request.args.get('id')
-    
-    return render_template('home.html')
+@app.route('/<int:studentId>/dashboard')
+def dashboard(studentId):
+    return render_template('dashboard.html',studentId=studentId)
 
 @app.route('/')
-def what():
-    conn=db_conn()
-    cur = conn.cursor()
-    select = '''select * from student;'''
-    cur.execute(select)
-    data=cur.fetchone()
-    print(data)
+def home():
     return render_template("home.html")
