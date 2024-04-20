@@ -4,19 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    
 </head>
 <body>
     <h1>First quiz</h1>
-    <ol>
-        {% for row in firstQuiz %}
-            <li>{{ row[1] }}</li> <!-- Display the question -->
-            <ul>
-                <li>{{ row[2] }}</li>
-                <li>{{ row[3] }}</li>
-                <li>{{ row[4] }}</li>
-                <li>{{ row[5] }}</li>
-            </ul>
+    <div id="question-list">
+        <ol>
+            {% for i,question, option1, option2, option3, option4 in firstQuiz %}
+            <li>
+                {{ question }}
+                <form>
+                    <div class="response">
+                        <input type="radio" name="visual" value="visual">
+                        <label for="visual"> {{ option1 }}</label>
+                    </div>
+                    <div class="response">
+                        <input type="radio" name="auditory" value="auditory">
+                        <label for="auditory"> {{ option2 }}</label>
+                    </div>
+                    <div class="response">
+                        <input type="radio" name="reading" value="reading">
+                        <label for="reading"> {{ option3 }}</label>
+                    </div>
+                    <div class="response">
+                        <input type="radio" name="kinematics" value="kinematics">
+                        <label for="kinematics"> {{ option4 }}</label>
+                    </div>
+                </form>
+            </li>
         {% endfor %}
-    </ol>
+        </ol>
+    </div>
+    <form id="quiz-form" method="post">
+        <button type="submit" id="submit-button">Submit Types</button>
+    </form>
+    <script>
+        const submitButton = document.getElementById('submit-button');
+        submitButton.addEventListener('click', () => {
+            const questionList = document.getElementById('question-list');
+            let v=0,a=0,r=0,k=0
+            let isUnanswered = false;
+            let learnstyle = ""
+            questionList.querySelectorAll('li').forEach(question => {
+                if (!question.querySelector('input[type="radio"]:checked')){
+                    isUnanswered = true;
+                    return;
+                }
+            });
+            if (isUnanswered) {
+                alert("Please answer all questions before submitting!");
+                location.reload();
+                return; 
+            }
+            questionList.querySelectorAll('li').forEach(question => {
+                const selectedOption = question.querySelector('input[type="radio"]:checked');
+                const selectedType = selectedOption.value;
+                if (selectedType === 'visual') {
+                    v++;
+                } else if (selectedType === 'auditory') {
+                    a++;
+                } else if (selectedType === 'reading') {
+                    r++;
+                } else if (selectedType === 'kinematics') {
+                    k++;
+                }
+            });
+            if (v > a && v > r && v > k) {
+                learnstyle='visual';
+            } else if (a > v && a > r && a > k) {
+                learnstyle='auditory';
+            } else if (r > v && r > a && r > k) {
+                learnstyle='reading';
+            } else if (k > v && k > a && k > r) {
+                learnstyle='kinematics';
+            } else {
+                learnstyle='Modular';
+            }
+
+            // Implement your logic to send the selectedAnswers object to your server-side code for further processing.
+            const form = document.getElementById('quiz-form');
+            const learnStyleInput = document.createElement('input');
+            learnStyleInput.type = 'hidden';
+            learnStyleInput.name = 'learnStyle';
+            learnStyleInput.value = learnstyle;
+            form.appendChild(learnStyleInput);
+            form.submit();
+        });
+        
+    </script>
 </body>
 </html>

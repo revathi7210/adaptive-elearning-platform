@@ -43,7 +43,11 @@ def displayFirstQuiz():
     cur.execute("select * from first_quiz;")
     firstQuiz = cur.fetchall()
     if request.method == 'POST':
-        pass
+        learnstyle = request.form['learnStyle']
+        cur.execute(f'''update student set learnstyle='{learnstyle}' where id={studentId};''')
+        conn.commit()
+        print(learnstyle)
+        return redirect(url_for('dashboard',studentId=studentId))
     return render_template("firstquiz.html",firstQuiz=firstQuiz)
 
 @app.route('/login', methods=['GET','POST'])
@@ -100,7 +104,6 @@ def dashboard(studentId):
 
         # Process the course ID as needed
         print("Received course ID:", course_id)
-       
         return redirect(url_for('course'))
 
 
