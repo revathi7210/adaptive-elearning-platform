@@ -29,9 +29,22 @@ def signup():
         
         cur.execute("INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", (email, password,username))
         conn.commit()
-        return redirect(url_for('login'))
 
+        cur.execute(f'''select id from student where username = '{username}';''')
+        studentId=cur.fetchone()
+        return redirect(url_for('displayFirstQuiz',id=studentId[0]))
     return render_template("signup.html")
+
+@app.route('/firstquiz',methods=['GET','POST'])
+def displayFirstQuiz():
+    studentId=request.args.get('id')
+    conn=db_conn()
+    cur = conn.cursor()
+    cur.execute("select * from first_quiz;")
+    firstQuiz = cur.fetchall()
+    if request.method == 'POST':
+        pass
+    return render_template("firstquiz.html",firstQuiz=firstQuiz)
 
 @app.route('/login', methods=['GET','POST'])
 def login():
