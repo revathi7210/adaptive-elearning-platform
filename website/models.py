@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 class Student(db.Model):
     __tablename__ = 'student'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True , autoincrement=True)
     email = Column(String(1000))
     pwd = Column(String(65535))
     username = Column(String(1000), unique=True)

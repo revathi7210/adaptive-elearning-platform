@@ -15,7 +15,10 @@ def signup():
         password = request.form['password']
         email = request.form['email']
 
+        print(username)
+
         selectExistingUserQuery = f'''SELECT * from student where username='{username}';'''
+        print(selectExistingUserQuery)
         cur.execute(selectExistingUserQuery)
         data1 = cur.fetchone()
         print(data1)
@@ -24,10 +27,10 @@ def signup():
         data2 = cur.fetchone()
         print(data2)
         
-        if len(data1) != 0 or len(data2) != 0:
+        if data1 != None or data2 != None:
             return "Username or email already exists. Please choose another one."
         
-        cur.execute("INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", ('{email}', '{password}','{username}'))
+        cur.execute(f'''INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", ('{email}', '{password}','{username}');''')
         # getStudentId = f'''Select id from student where email='{email}' and username='{username}';'''
         # cur.execute(getStudentId)
         # data = cur.fetchall()[0]
@@ -36,7 +39,7 @@ def signup():
     return render_template("signup.html")
 
 @app.route('/home')
-def home(StudentId):
+def home():
     return render_template('home.html')
 
 @app.route('/')
