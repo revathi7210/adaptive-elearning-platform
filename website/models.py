@@ -13,7 +13,7 @@ class Student(db.Model):
 class Client(db.Model):
     __tablename__ = 'client'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(1000))
     pwd = Column(String(65535))
     clientname = Column(String(1000), unique=True)
@@ -21,7 +21,7 @@ class Client(db.Model):
 class FirstQuiz(db.Model):
     __tablename__ = 'first_quiz'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     question = Column(String(2000))
     choice1 = Column(String(1000))
     choice2 = Column(String(1000))
@@ -31,7 +31,7 @@ class FirstQuiz(db.Model):
 class Course(db.Model):
     __tablename__ = 'course'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     coursename = Column(String(1000), unique=True)
     coursedescription = Column(String(65535))
     clientid = Column(Integer, ForeignKey('client.id'))
@@ -40,7 +40,7 @@ class Course(db.Model):
 class Lesson(db.Model):
     __tablename__ = 'lesson'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     lessonname = Column(String(1000))
     lessondescription = Column(String(65535))
     courseid = Column(Integer, ForeignKey('course.id'))
@@ -50,7 +50,7 @@ class Lesson(db.Model):
 class Material(db.Model):
     __tablename__ = 'material'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     visual = Column(String(65535))
     auditory = Column(String(65535))
     reading = Column(String(65535))
@@ -61,7 +61,7 @@ class Material(db.Model):
 class Questionnaire(db.Model):
     __tablename__ = 'questionnaire'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     question = Column(String(65535))
     choice1 = Column(String(1000))
     choice2 = Column(String(1000))
@@ -76,7 +76,7 @@ class Questionnaire(db.Model):
 class MaterialProgress(db.Model):
     __tablename__ = 'material_progress'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     studentid = Column(Integer, ForeignKey('student.id'))
     lessonid = Column(Integer, ForeignKey('lesson.id'))
     materialid = Column(Integer, ForeignKey('material.id'))
@@ -84,7 +84,7 @@ class MaterialProgress(db.Model):
 class LessonProgress(db.Model):
     __tablename__ = 'lesson_progress'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     progress = Column(Float(precision=2))
     studentid = Column(Integer, ForeignKey('student.id'))
     lessonid = Column(Integer, ForeignKey('lesson.id'))
@@ -92,7 +92,7 @@ class LessonProgress(db.Model):
 class CourseProgress(db.Model):
     __tablename__ = 'course_progress'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     progress = Column(Float(precision=2))
     studentid = Column(Integer, ForeignKey('student.id'))
     courseid = Column(Integer, ForeignKey('course.id'))
