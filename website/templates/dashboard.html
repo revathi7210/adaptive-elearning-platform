@@ -94,6 +94,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Get the studentId from the data attribute
             var studentId = document.getElementById('dashboard').getAttribute('data-studentId');
+            console.log(studentId);
     
             // Add event listeners to the buttons
             var continueButtons = document.querySelectorAll('.continue-button');
@@ -109,11 +110,11 @@
             enrollButtons.forEach(function(button) {
                 button.addEventListener('click', function() {
                     var courseId = button.getAttribute('data-course-id');
-                    sendToBackend(studentId, courseId);
-                    window.location.href=`/course` // Pass studentId to sendToBackend function
+                    sendToDatabase(studentId, courseId);
                 });
             });
-    
+
+            
             function sendToBackend(studentId, courseId) {
                 // Make an AJAX request to your Flask endpoint
                 var xhr = new XMLHttpRequest();
@@ -128,7 +129,29 @@
                     }
                 };
                 xhr.send(JSON.stringify({ courseId: courseId }));
+                
             }
+
+            
+            function sendToDatabase(studentId, courseId) {
+                // Make an AJAX request to the Flask endpoint
+                var xhr = new XMLHttpRequest();
+                console.log(studentId);
+                xhr.open('POST', '/enroll');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        console.log('Enrollment successful');
+                        window.location.href=`/course`
+            
+                    } else
+                     {
+                        console.log('Error:', xhr.statusText);
+                    }
+                };
+                xhr.send(JSON.stringify({ studentId: studentId, courseId: courseId }));
+            }
+
         });
     </script>
     

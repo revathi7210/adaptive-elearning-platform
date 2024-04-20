@@ -98,7 +98,6 @@ def dashboard(studentId):
     elif request.method == 'POST':
 
         data = request.json
-
         # Access the course ID
         course_id = data.get('courseId')
 
@@ -107,10 +106,23 @@ def dashboard(studentId):
         return redirect(url_for('course'))
 
 
-@app.route('/course',methods=['GET','POST'])
+@app.route('/enroll', methods=['POST'])
+def enroll():
+    studentId = request.json.get('studentId')
+    courseId = request.json.get('courseId')
+    print(studentId)
+    print(courseId)
+    conn=db_conn()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO course_progress (studentid, courseid) VALUES (%s, %s);", (studentId, courseId))
+    conn.commit()
+    return redirect(url_for('course'))  # Correct way to redirect
+
+@app.route('/course', methods=['GET', 'POST'])
 def course():
     if request.method == 'GET':
         return render_template('course.html')
+
 
 @app.route('/')
 def home():
