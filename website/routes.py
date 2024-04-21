@@ -6,6 +6,7 @@ from website.models import Material
 from flask import render_template, url_for, redirect, request, session,jsonify
 from website import app
 import psycopg2
+import numpy as np
 
 def db_conn():
     conn = psycopg2.connect(database="flaskdb", host="localhost", user="flaskuser",password="flaskpwd",port="5432")
@@ -191,19 +192,42 @@ def get_questions(LessonId):
 
     return questions
 
-def calculate_score(difficulty, time_taken,answered):
-    # Assign weights based on difficulty
-    weight_difficulty = 3 if difficulty == "hard" else 2 if difficulty == "medium" else 1 
-    # Calculate score for the question
-    score = ((weight_difficulty * answered )/(int(time_taken)))*10
-    return score
+def normalize_score(score, min_value, max_value):
+  """
+  Normalizes a score between 0 and 1 based on its original range.
+  """
+  return (score - min_value) / (max_value - min_value)
+
+
+
+def calculate_score(learning_style, difficulty, time_taken, is_correct):
+    learning_style_weight = 0.3
+    difficulty_weight = 0.4
+    time_taken_weight = 1
+    correctness_weight = np.logaddexp((is_correct-difficulty),10)   # Adjust weight calculation as needed
+
+    correctness_weight = correctness_weight/100
+
+    normalized_time_taken = min(1, max(0, time_taken / 60)) 
+    
+    learning_style_score = (np.exp(learning_style) - 1) / (np.exp(1) - 1) * learning_style_weight
+    
+    difficulty_score = (np.exp(difficulty) - 1) / (np.exp(1) - 1) * difficulty_weight
+    
+    time_taken_score = (1 - np.sqrt(normalized_time_taken)) * time_taken_weight
+    
+    correctness_score = (np.sqrt(2*is_correct) - 1) / (np.sqrt(2) - 1) * correctness_weight
+
+    total_score = learning_style_score + difficulty_score + time_taken_score + correctness_score
+    
+    return total_score*10
 
 def adaptive_algorithm(index,user_answer,correct_answer,difficulty,time_taken):
     if user_answer == correct_answer:
         answered = 1
     else:
         answered = 0
-    question_score = calculate_score(difficulty, time_taken,answered)
+    question_score = calculate_score(0.2,difficulty, time_taken,answered)
     #score=score + question_score
     print(difficulty," ",time_taken," ",question_score)
     if(question_score<=3):
@@ -241,7 +265,13 @@ def quiz(studentId,courseId,lessonId):
         user_answer = request.form['user_answer']
         correct_answer = request.form['correct_answer']
         difficulty = request.form['difficulty']
-        time_taken = request.form.get('time_taken')
+        if difficulty=='hard':
+            difficulty = 0.75
+        elif difficulty=='medium':
+            difficulty = 0.5
+        else :
+            difficulty =0.25
+        time_taken = int(request.form.get('time_taken'))
 
         # Your code for converting user_answer to 'A', 'B', 'C', 'D', or 'E'
         if user_answer == request.form['option1']:
@@ -258,6 +288,8 @@ def quiz(studentId,courseId,lessonId):
 
         session['score'] += currentscore
 
+        print(session['current_question'],'\t', session['score'])
+
         if difficulty == 'easy':
             current_question_data = get_question_data(easy_questions, index[0])
         elif difficulty == 'medium':
@@ -268,7 +300,7 @@ def quiz(studentId,courseId,lessonId):
         session['index'] = index
 
         if session['current_question'] == 5:  # Assuming there are 5 questions
-            return redirect(url_for('quizresult', score=session['score'],courseId=courseId,studentId=studentId,lessonId=lessonId))
+            return redirect(url_for('quizresult', quizScore=session['score'],courseId=courseId,studentId=studentId,lessonId=lessonId))
 
         session['current_question'] += 1
 
@@ -288,9 +320,9 @@ def quiz(studentId,courseId,lessonId):
 def get_question_data(questions_list, index):
     return questions_list[index]
 
-@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/quizresult',methods=['GET','POST'])
-def quizresult(studentId,courseId,lessonId):
-    quizScore = request.args.get('score')
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/quizresult/<float:quizScore>',methods=['GET','POST'])
+def quizresult(studentId,courseId,lessonId,quizScore):
+    
     conn = db_conn()
     cur = conn.cursor()
     if request.method == 'POST':
@@ -305,10 +337,10 @@ def quizresult(studentId,courseId,lessonId):
         cur.execute(f'''UPDATE course_progress set progress={coursescore} where studentid={studentId} and courseid={courseId};''')
         conn.commit()
         #calculate material difficulty to-do
-        difficulty='easy'
-        return redirect(url_for('getMaterial',studentId=studentId,courseId=courseId,lessonId=lessonId,difficulty=difficulty))
-
-    return render_template('quizresult.html')
+     
+        return redirect(url_for("getMaterial",score=score,studentId=studentId,courseId=courseId,lessonId=lessonId))
+    else:
+        return render_template('quizresult.html',score=quizScore,studentId=studentId,courseId=courseId,lessonId=lessonId)
 
 
 def calscore(score):
@@ -332,26 +364,32 @@ def calCourseScore(courseId):
     # Ensure the progress is between 0 and 100
     return min(max(course_progress, 0), 100)
 
-@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['GET'])
-def getMaterial(studentId, courseId, lessonId):
-    # difficulty = request.args.get('difficulty')
-    conn=db_conn()
-    cur = conn.cursor()
-    difficulty='easy'
-    # cur.execute(f'''select learnstyle from student where id={studentId};''')
-    # data=cur.fetchone()[0]
-    data = 'reading'
-    if data == 'visual':
-        cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-    elif data == 'auditory':
-        cur.execute(f'''select auditory from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-    elif data == 'reading' or data == 'kinematics' or data == 'Modular':
-        cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-    material = cur.fetchone()[0]
-    
-    print(lessonId,difficulty)
-    print(material)
-    return render_template('material.html',data=data, material=material)
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material/<float:score>',methods=['GET'])
+def getMaterial(studentId, courseId, lessonId,score): 
+    if score > 0.75 :
+        difficulty='hard'
+    elif score > 0.5 :
+        difficulty='medium'
+    else :
+        difficulty='easy'
+       
+    if request.method == "GET":
+        conn=db_conn()
+        cur = conn.cursor()
+        cur.execute(f'''select learnstyle from student where id={studentId};''')
+        data=cur.fetchone()[0]
+        print("difficulty", difficulty)
+        print("data", data)
+
+        if data == 'visual':
+            cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+        elif data == 'auditory':
+            cur.execute(f'''select auditory from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+        elif data == 'reading' or data == 'kinematics' or data == 'Modular':
+            cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+        material = cur.fetchone()[0]
+        return render_template('material.html')
+    return render_template('material.html' )
 
 
 @app.route('/insertMaterial/<int:clientId>',methods=['POST','GET'])
