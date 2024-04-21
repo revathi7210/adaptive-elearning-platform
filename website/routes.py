@@ -1,3 +1,8 @@
+from werkzeug.utils import secure_filename
+import boto3
+import uuid
+from website import db
+from website.models import Material
 from flask import render_template, url_for, redirect, request, session,jsonify
 from website import app
 import psycopg2
@@ -120,6 +125,8 @@ def dashboard(studentId):
             enrolled_courses = []
             cur.execute("SELECT * FROM course")
             not_enrolled_courses = cur.fetchall()        
+
+        print(not_enrolled_courses)
 
         return render_template('dashboard.html',studentId=studentId,enrolled_courses=enrolled_courses,not_enrolled_courses=not_enrolled_courses)
     elif request.method == 'POST':
@@ -318,11 +325,50 @@ def updateProgressDb():
     conn.commit()
     return redirect(url_for('material',studentId=studentId,courseId=courseId,lessonId=lessonId))
 
-# @app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['POST','GET'])
 
-@app.route('/insertMaterial',methods=['POST','GET'])
-def insertMaterial():
-    pass
+
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['POST','GET'])
+
+@app.route('/insertMaterial/<int:clientId>',methods=['POST','GET'])
+def insertMaterial(clientId):
+    if request.method == "POST":
+        # Extract data from the request
+        visual_file = request.files.get('visual_file')
+        auditory_file = request.files.get('auditory_file')
+        reading_file = request.files.get('reading_file')
+        difficulty = request.form.get('difficulty')
+        lessonId = request.form.get('lessonId')
+
+        # Save files to S3 or any other storage backend
+        s3 = boto3.resource("s3")
+        bucket_name = 'readingm'  # Replace with your bucket name
+
+        # Ensure the files are not None and have a valid filename
+        if visual_file:
+            VisualFilename = uuid.uuid4().hex + '.' + secure_filename(visual_file.filename).rsplit('.', 1)[1].lower()
+            s3.Bucket(bucket_name).upload_fileobj(visual_file, VisualFilename)
+
+        if auditory_file:
+            AuditoryFilename = uuid.uuid4().hex + '.' + secure_filename(auditory_file.filename).rsplit('.', 1)[1].lower()
+            s3.Bucket(bucket_name).upload_fileobj(auditory_file, AuditoryFilename)
+
+        if reading_file:
+            ReadingFilename = uuid.uuid4().hex + '.' + secure_filename(reading_file.filename).rsplit('.', 1)[1].lower()
+            s3.Bucket(bucket_name).upload_fileobj(reading_file, ReadingFilename)
+
+        # Save data to the database
+        material = Material(
+            visual=f"https://{bucket_name}.s3.amazonaws.com/{VisualFilename}" if visual_file else "",
+            auditory=f"https://{bucket_name}.s3.amazonaws.com/{AuditoryFilename}" if auditory_file else "",
+            reading=f"https://{bucket_name}.s3.amazonaws.com/{ReadingFilename}" if reading_file else "",
+            difficulty=difficulty,
+            lessonid=lessonId,
+        )
+        db.session.add(material)  # Add to SQLAlchemy session
+        db.session.commit()  # Commit to the database
+
+        return redirect(url_for("insertMaterial",clientId=clientId))
+    return render_template("uploadfiles.html",clientId=clientId)
 
 @app.route('/')
 def home():
