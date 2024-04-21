@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='quiz.css') }}">
+</head>
+<body>
+    <div id="timer">Time Spent: <span id="time">0:00</span></div>
+    <div id="quiz-container">
+        <form id="quiz-form" action="{{ url_for('quiz',studentId=studentId, courseId=courseId, lessonId=lessonId) }}" method="post">
+            <div class="question">
+                {{ question }}
+            </div>
+            <div class="options">
+                {% for option in options %}
+                    <div class="option">
+                        <input type="radio" name="user_answer" value="{{ option }}" required>
+                        {{ option }}
+                        <input type="hidden" name="option{{ loop.index }}" value="{{ option }}">
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- <input type="hidden" name="current_question" value="{{ current_question }}"> -->
+            <input type="text" name="correct_answer" value="{{ correct_answer }}">
+            <!-- <input type="hidden" name="score" value="{{ score }}"> -->
+            <input type="text" name="difficulty" value="{{ difficulty }}">
+            <input type="hidden" name="time_taken" id="time-taken" value="">
+
+            <!-- Display timer -->
+           
+
+            <button type="submit" onclick="submitForm()">Submit Answer</button>
+        </form>
+
+        <script>
+            var timer;
+            var startTime;
+
+            // Start the timer when the page loads
+            window.onload = function () {
+                startTime = new Date().getTime();
+                timer = setInterval(updateTimer, 1000);
+            };
+
+            // Function to update the timer
+            function updateTimer() {
+                var currentTime = new Date().getTime();
+                var elapsedTime = currentTime - startTime;
+                var seconds = Math.floor(elapsedTime / 1000);
+                var minutes = Math.floor(seconds / 60);
+                seconds = seconds % 60;
+
+                // Update the timer display
+                document.getElementById("time").innerHTML = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+                // Update the hidden input field with the time taken
+                document.getElementById("time-taken").value = minutes*60 + seconds;
+            }
+
+            // Function to submit the form
+            function submitForm() {
+                clearInterval(timer); // Stop the timer
+                document.getElementById("quiz-form").submit(); // Submit the form
+            }
+        </script>
+    </div>
+</body>
+</html>

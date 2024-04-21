@@ -101,7 +101,7 @@
             continueButtons.forEach(function(button) {
                 button.addEventListener('click', function() {
                     var courseId = button.getAttribute('data-course-id');
-                    //sendToBackend(studentId, courseId);
+                    sendToBackend(studentId, courseId);
                     window.location.href=`/${studentId}/course/${courseId}` // Pass studentId to sendToBackend function
                 });
             });
@@ -115,22 +115,22 @@
             });
 
             
-            // function sendToBackend(studentId, courseId) {
-            //     // Make an AJAX request to your Flask endpoint
-            //     var xhr = new XMLHttpRequest();
-            //     xhr.open('POST', `/${studentId}/course/${courseId}`);
-            //     xhr.setRequestHeader('Content-Type', 'application/json');
-            //     xhr.onload = function() {
-            //         if (xhr.status === 200) {
-            //             console.log('Data sent successfully');
-            //             // Optionally, handle the response from the server
-            //         } else {
-            //             console.log('Error:', xhr.statusText);
-            //         }
-            //     };
-            //     xhr.send(JSON.stringify({ courseId: courseId }));
+            function sendToBackend(studentId, courseId) {
+                // Make an AJAX request to your Flask endpoint
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', `/${studentId}/course/${courseId}`);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        console.log('Data sent successfully');
+                        // Optionally, handle the response from the server
+                    } else {
+                        console.log('Error:', xhr.statusText);
+                    }
+                };
+                xhr.send(JSON.stringify({ courseId: courseId }));
                 
-            // }
+            }
 
             
             function sendToDatabase(studentId, courseId) {
@@ -149,7 +149,7 @@
                         console.log('Error:', xhr.statusText);
                     }
                 };
-                //xhr.send(JSON.stringify({ studentId: studentId, courseId: courseId }));
+                xhr.send(JSON.stringify({ studentId: studentId, courseId: courseId }));
             }
 
         });
