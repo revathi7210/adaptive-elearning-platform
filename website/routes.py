@@ -268,7 +268,7 @@ def quiz(studentId,courseId,lessonId):
         session['index'] = index
 
         if session['current_question'] == 5:  # Assuming there are 5 questions
-            return render_template('quiz_result.html', score=session['score'],courseId=courseId,studentId=studentId,lessonId=lessonId)
+            return redirect(url_for('quizresult', score=session['score'],courseId=courseId,studentId=studentId,lessonId=lessonId))
 
         session['current_question'] += 1
 
@@ -288,7 +288,27 @@ def quiz(studentId,courseId,lessonId):
 def get_question_data(questions_list, index):
     return questions_list[index]
 
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/quizresult',methods=['GET','POST'])
+def quizresult(studentId,courseId,lessonId):
+    quizScore = request.args.get('score')
+    conn = db_conn()
+    cur = conn.cursor()
+    if request.method == 'POST':
+        cur.execute(f'''select learnstyle from student where id={studentId};''')
+        data=cur.fetchone()
 
+        score=calscore(quizScore)
+        cur.execute(f'''UPDATE lesson_progress set progress={score} where studentid={studentId} and lessonid={lessonId};''')
+        conn.commit()
+
+        coursescore=calCourseScore(courseId)
+        cur.execute(f'''UPDATE course_progress set progress={coursescore} where studentid={studentId} and courseid={courseId};''')
+        conn.commit()
+        #calculate material difficulty to-do
+        difficulty='easy'
+        return redirect(url_for('getMaterial',studentId=studentId,courseId=courseId,lessonId=lessonId,difficulty=difficulty))
+
+    return render_template('quizresult.html')
 
 
 def calscore(score):
@@ -311,28 +331,23 @@ def calCourseScore(courseId):
 
     # Ensure the progress is between 0 and 100
     return min(max(course_progress, 0), 100)
-    
 
-@app.route('/quizresult' ,methods=['POST'])
-def updateProgressDb():
-    studentId=request.args.get('studentId')
-    lessonId=request.args.get('lessonId')
-    courseId=request.args.get('courseId')
-    score=request.args.get('score')
-    score=calscore(score)
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['GET'])
+def getMaterial(studentId, courseId, lessonId):
+    difficulty = request.args.get('difficulty')
     conn=db_conn()
     cur = conn.cursor()
-    cur.execute(f'''UPDATE lesson_progress set progress={score} where studentid={studentId} and lessonid={lessonId};''')
-    conn.commit()
+    cur.execute(f'''select learnstyle from student where id={studentId};''')
+    data=cur.fetchone()[0]
+    if data == 'visual':
+        cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+    elif data == 'auditory':
+        cur.execute(f'''select auditory from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+    elif data == 'reading' or data == 'kinematics' or data == 'Modular':
+        cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+    material = cur.fetchone()[0]
+    return render_template('material.html', material=material)
 
-    coursescore=calCourseScore(courseId)
-    cur.execute(f'''UPDATE course_progress set progress={coursescore} where studentid={studentId} and courseid={courseId};''')
-    conn.commit()
-    return redirect(url_for('material',studentId=studentId,courseId=courseId,lessonId=lessonId))
-
-
-
-@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['POST','GET'])
 
 @app.route('/insertMaterial/<int:clientId>',methods=['POST','GET'])
 def insertMaterial(clientId):
