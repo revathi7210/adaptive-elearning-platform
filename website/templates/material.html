@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy Content Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .content-container {
+            width: 80%;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            height: 80vh;
+            /* Adjust as needed */
+        }
+
+        .video-container {
+            width: 80%;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            /* overflow-y: scroll; */
+            height: 80vh;
+            /* Adjust as needed */
+        }
+
+        .media-container {
+            width: 80%;
+            margin: 20% auto;
+            border: 1px solid #ccc;
+            /* overflow-y: scroll; */
+            height: 5vh;
+            /* Adjust as needed */
+        }
+
+        video,
+        audio {
+            width: 100%;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+            /* Hide scroll for video and audio */
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    {% if data == 'reading' %}
+    {% if material %}
+    <div class="content-container">
+        <iframe src="{{ material[0] }}.pdf&embedded=true" title="PDF Viewer"></iframe>
+    </div>
+
+    {% endif %}
+    {% elif data == 'visual' %}
+    <div class="video-container">
+        <video controls>
+            <source src="{{ material[0] }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    {% elif data == 'auditory' %}
+    <div class="media-container">
+        <audio controls>
+            <source src="{{ material[0] }}" type="audio/mpeg">
+            Your browser does not support the audio tag.
+        </audio>
+    </div>
+
+    {% endif %}
+
+</body>
+
+</html>
