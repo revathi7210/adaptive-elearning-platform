@@ -1,11 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Lesson Catalog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2%;
+            padding: 0;
+        }
+
+        .course-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 100px;
+            justify-items: center;
+            padding: 20px;
+        }
+
+        .course-card {
+            display: flex;
+            flex-direction: column;
+            background-color: #ebf3fc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+
+        button {
+            background-color: #0f6cbd;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: fit-content;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #115ea3;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            gap: 64px;
+        }
+    </style>
 </head>
-<body>
-    Course
+
+<body id="dashboard" data-studentId="{{ studentId }}" data-courseId="{{ courseId }}">
+    <div class="main">
+        <div>
+            <h2>Completed Lessons</h2>
+            <div class="course-container">
+                {% for row in completed_lessons %}
+                <div class="course-card">
+                    <h3>{{ row[1] }}</h3>
+                    <p>{{ row[2] }}</p>
+                    <!-- <button class="continue-button" data-lesson-id="{{ row[0] }}">Continue</button> -->
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div>
+            <h2>On-going Lessons</h2>
+            <div class="course-container">
+                {% if on_going_lessons %}
+                <div class="course-card">
+                    <h3>{{ on_going_lessons[1] }}</h3>
+                    <p>{{ on_going_lessons[2] }}</p>
+                    <button class="continue-button" data-lesson-id="{{ on_going_lessons[0] }}">Continue</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <h2>Lessons to Begin</h2>
+            <div class="course-container">
+                {% for row in not_attempted_lessons %}
+                <div class="course-card">
+                    <h3>{{ row[1] }}</h3>
+                    <p>{{ row[2] }}</p>
+                    {% if on_going_lessons %}
+                        <!-- <button class="enroll-button" data-lesson-id="{{ row[0] }}">Start</button> -->
+                    {% else %}
+                        <button class="enroll-button" data-lesson-id="{{ row[0] }}">Start</button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the studentId from the data attribute
+            var studentId = document.getElementById('dashboard').getAttribute('data-studentId');
+            var courseId = document.getElementById('dashboard').getAttribute('data-courseId');
+    
+            // Add event listeners to the buttons
+            var continueButtons = document.querySelectorAll('.continue-button');
+            continueButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var lessonId = button.getAttribute('data-lesson-id');
+                    // sendToBackend(studentId, courseId,lessonId);
+                    window.location.href=`/${studentId}/course/${courseId}/${lessonId}/material` // Pass studentId to sendToBackend function
+                });
+            });
+    
+            var enrollButtons = document.querySelectorAll('.enroll-button');
+            enrollButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var lessonId = button.getAttribute('data-lesson-id');
+                    // sendToBackend(studentId, courseId,lessonId);
+                    window.location.href=`/${studentId}/course/${courseId}/${lessonId}/quiz` // Pass studentId to sendToBackend function
+                });
+            });
+
+            // function sendToBackend(studentId, courseId,lessonId) {
+            //     // Make an AJAX request to your Flask endpoint
+            //     var xhr = new XMLHttpRequest();
+            //     xhr.open('POST', `/material`);
+            //     xhr.setRequestHeader('Content-Type', 'application/json');
+            //     xhr.onload = function() {
+            //         if (xhr.status === 200) {
+            //             console.log('Data sent successfully');
+            //             // Optionally, handle the response from the server
+            //         } else {
+            //             console.log('Error:', xhr.statusText);
+            //         }
+            //     };
+            //     xhr.send(JSON.stringify({ lessonId: lessonId }));
+            // }
+        });
+    </script>
+    
+
+
 </body>
+
 </html>

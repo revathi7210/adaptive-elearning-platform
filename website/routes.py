@@ -118,10 +118,25 @@ def enroll():
     return redirect(url_for('course',studentId=studentId,courseId=courseId))  # Correct way to redirect
 
 @app.route('/<int:studentId>/course/<int:courseId>', methods=['GET', 'POST'])
-def course(studentId, courseId):
+def course(studentId,courseId):
+    conn=db_conn()
+    cur = conn.cursor()
     if request.method == 'GET':
-        return render_template('course.html')
-    
+        
+        cur.execute("SELECT l.id, l.lessonname, l.lessondescription FROM lesson l JOIN lesson_progress lp ON l.id=lp.lessonid WHERE lp.progress = 0 AND lp.studentid = %s AND l.courseid = %s", (studentId, courseId,))
+        not_attempted_lessons = cur.fetchall()
+        print('0',not_attempted_lessons)
+
+        cur.execute("SELECT l.id, l.lessonname, l.lessondescription FROM lesson l JOIN lesson_progress lp ON l.id=lp.lessonid WHERE lp.progress > 0 AND lp.progress < 100 AND lp.studentid = %s AND l.courseid = %s", (studentId, courseId,))
+        on_going_lessons = cur.fetchone()
+        print('0-100',on_going_lessons)
+
+        cur.execute("SELECT l.id, l.lessonname, l.lessondescription FROM lesson l JOIN lesson_progress lp ON l.id=lp.lessonid WHERE lp.progress = 100 AND lp.studentid = %s AND l.courseid = %s", (studentId, courseId,))
+        completed_lessons = cur.fetchall()
+        print('100',completed_lessons)
+
+
+        return render_template('course.html',studentId=studentId,courseId=courseId,not_attempted_lessons=not_attempted_lessons,on_going_lessons=on_going_lessons,completed_lessons=completed_lessons)  
 
 
 
