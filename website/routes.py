@@ -103,7 +103,7 @@ def login():
                 if password != pwd :
                     return "Incorrect password."
                 else :
-                    return redirect(url_for('insertMaterial',clientid=clientid))
+                    return redirect(url_for('insertMaterial',clientId=clientid))
 
     return render_template("login.html")
 
