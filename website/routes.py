@@ -148,6 +148,11 @@ def enroll():
     conn=db_conn()
     cur = conn.cursor()
     cur.execute("INSERT INTO course_progress (progress, studentid, courseid) VALUES (%s, %s, %s);", ('0',studentId, courseId))
+    cur.execute("SELECT id FROM lesson WHERE courseid = %s", (courseId),)
+    course_lessons = cur.fetchall()
+    for lesson in course_lessons:
+        cur.execute("INSERT INTO lesson_progress (progress, studentid, lessonid) VALUES (%s, %s, %s);", ('0',studentId, lesson))
+
     conn.commit()
     return redirect(url_for('course',studentId=studentId,courseId=courseId))  # Correct way to redirect
 
