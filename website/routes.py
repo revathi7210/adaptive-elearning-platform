@@ -14,25 +14,37 @@ def signup():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        usertype = request.form['usertype']
+        if usertype == 'student':
+            selectExistingUserQuery = f'''SELECT * from student where username='{username}';'''
+            cur.execute(selectExistingUserQuery)
+            data1 = cur.fetchone()
+            selectExistingEmailQuery = f'''SELECT * from student where email='{email}';'''
+            cur.execute(selectExistingEmailQuery)
+            data2 = cur.fetchone()
+            if data1 != None or data2 != None:
+                return "Username or email already exists. Please choose another one."
+            
+            cur.execute("INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", (email, password,username))
+            conn.commit()
+            cur.execute(f'''select id from student where username = '{username}';''')
+            studentId=cur.fetchone()
+            return redirect(url_for('displayFirstQuiz',id=studentId[0]))
 
+        if usertype == 'client':
+            selectExistingUserQuery = f'''SELECT * from client where clientname='{username}';'''
+            cur.execute(selectExistingUserQuery)
+            data1 = cur.fetchone()
+            selectExistingEmailQuery = f'''SELECT * from client where email='{email}';'''
+            cur.execute(selectExistingEmailQuery)
+            data2 = cur.fetchone()
+            if data1 != None or data2 != None:
+                return "Username or email already exists. Please choose another one."
+            
+            cur.execute("INSERT INTO client (email, pwd, clientname) VALUES (%s, %s, %s);", (email, password,username))
+            conn.commit()
+            return redirect(url_for('login'))
         
-        selectExistingUserQuery = f'''SELECT * from student where username='{username}';'''
-        cur.execute(selectExistingUserQuery)
-        data1 = cur.fetchone()
-        selectExistingEmailQuery = f'''SELECT * from student where email='{email}';'''
-        cur.execute(selectExistingEmailQuery)
-        data2 = cur.fetchone()
-        
-        
-        if data1 != None or data2 != None:
-            return "Username or email already exists. Please choose another one."
-        
-        cur.execute("INSERT INTO student (email, pwd, username) VALUES (%s, %s, %s);", (email, password,username))
-        conn.commit()
-
-        cur.execute(f'''select id from student where username = '{username}';''')
-        studentId=cur.fetchone()
-        return redirect(url_for('displayFirstQuiz',id=studentId[0]))
     return render_template("signup.html")
 
 @app.route('/firstquiz',methods=['GET','POST'])
@@ -57,21 +69,36 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        getStudentId = f'''Select * from student where username='{username}';'''
-        cur.execute(getStudentId)
-        data = cur.fetchone()
-        
-        studentid=data[0]
-        pwd=data[2]
-        #print (studentid, pwd)
-        if studentid == None :
-            return "User account Does not exist. Please Signup."
-        else :
-            if password != pwd :
-                return "Incorrect password."
+        usertype = request.form['usertype']
+        if usertype == 'student':
+            getStudentId = f'''Select * from student where username='{username}';'''
+            cur.execute(getStudentId)
+            data = cur.fetchone()
+            
+            studentid=data[0]
+            pwd=data[2]
+            #print (studentid, pwd)
+            if studentid == None :
+                return "User account Does not exist. Please Signup."
             else :
-                return redirect(url_for('dashboard',studentId=studentid))
+                if password != pwd :
+                    return "Incorrect password."
+                else :
+                    return redirect(url_for('dashboard',studentId=studentid))
+        if usertype == 'client':
+            getClientId = f'''Select * from client where clientname='{username}';'''
+            cur.execute(getClientId)
+            data = cur.fetchone()
+            
+            clientid=data[0]
+            pwd=data[2]
+            if clientid == None :
+                return "User account Does not exist. Please Signup."
+            else :
+                if password != pwd :
+                    return "Incorrect password."
+                else :
+                    return redirect(url_for('insertMaterial',clientid=clientid))
 
     return render_template("login.html")
 
@@ -239,11 +266,11 @@ def quiz(studentId,courseId,lessonId):
             easy_questions, session['index'][0])
 
     return render_template('quiz.html',
-                           question=current_question_data[0],
-                           options=current_question_data[1:5],
-                           correct_answer=current_question_data[5],
-                           difficulty=current_question_data[6],
-                           courseId=courseId, lessonId=lessonId,studentId=studentId)
+                            question=current_question_data[0],
+                            options=current_question_data[1:5],
+                            correct_answer=current_question_data[5],
+                            difficulty=current_question_data[6],
+                            courseId=courseId, lessonId=lessonId,studentId=studentId)
 
 
 def get_question_data(questions_list, index):
@@ -291,9 +318,11 @@ def updateProgressDb():
     conn.commit()
     return redirect(url_for('material',studentId=studentId,courseId=courseId,lessonId=lessonId))
 
-@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['POST','GET'])
+# @app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['POST','GET'])
 
-
+@app.route('/insertMaterial',methods=['POST','GET'])
+def insertMaterial():
+    pass
 
 @app.route('/')
 def home():

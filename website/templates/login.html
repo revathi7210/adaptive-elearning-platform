@@ -7,7 +7,7 @@
     <!-- Include Fluent UI CSS here if necessary -->
     <link rel="stylesheet" href="path/to/fluentui.css">
     <!-- Include your own custom styles if necessary -->
-    <link rel="stylesheet" href="{ url_for('static', filename='login.css') }"> 
+    <link rel="stylesheet" href="static/login.css"> 
 </head>
 <body>
     <div class="root">
@@ -19,16 +19,18 @@
             <div class="formContainer">
                 <form method="post">
                     <div class="form" >
+                        <label for="usertype"> Select user type:</label>
+                        <select name="usertype" id="usertype">
+                            <option value="client">Client</option>
+                            <option value="student" selected>Student</option>
+                        </select>
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username" required>
-                        <!-- Add validation messages here if necessary -->
                         
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required>
-                        <!-- Add validation messages here if necessary -->
                         
                         <button type="submit">Log in</button>
-                        <!-- Add error message here if necessary -->
                     </div>
                 </form>
             </div>
