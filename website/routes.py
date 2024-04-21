@@ -334,11 +334,13 @@ def calCourseScore(courseId):
 
 @app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['GET'])
 def getMaterial(studentId, courseId, lessonId):
-    difficulty = request.args.get('difficulty')
+    # difficulty = request.args.get('difficulty')
     conn=db_conn()
     cur = conn.cursor()
-    cur.execute(f'''select learnstyle from student where id={studentId};''')
-    data=cur.fetchone()[0]
+    difficulty='easy'
+    # cur.execute(f'''select learnstyle from student where id={studentId};''')
+    # data=cur.fetchone()[0]
+    data = 'reading'
     if data == 'visual':
         cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
     elif data == 'auditory':
@@ -346,7 +348,10 @@ def getMaterial(studentId, courseId, lessonId):
     elif data == 'reading' or data == 'kinematics' or data == 'Modular':
         cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
     material = cur.fetchone()[0]
-    return render_template('material.html', material=material)
+    
+    print(lessonId,difficulty)
+    print(material)
+    return render_template('material.html',data=data, material=material)
 
 
 @app.route('/insertMaterial/<int:clientId>',methods=['POST','GET'])
