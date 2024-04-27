@@ -193,10 +193,7 @@ def get_questions(LessonId):
     return questions
 
 def normalize_score(score, min_value, max_value):
-  """
-  Normalizes a score between 0 and 1 based on its original range.
-  """
-  return (score - min_value) / (max_value - min_value)
+    return (score - min_value) / (max_value - min_value)
 
 
 
@@ -320,9 +317,9 @@ def quiz(studentId,courseId,lessonId):
 def get_question_data(questions_list, index):
     return questions_list[index]
 
-@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/quizresult/<float:quizScore>',methods=['GET','POST'])
-def quizresult(studentId,courseId,lessonId,quizScore):
-    
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/quizresult',methods=['GET','POST'])
+def quizresult(studentId,courseId,lessonId):
+    quizScore = request.args.get('quizScore')
     conn = db_conn()
     cur = conn.cursor()
     if request.method == 'POST':
@@ -337,7 +334,6 @@ def quizresult(studentId,courseId,lessonId,quizScore):
         cur.execute(f'''UPDATE course_progress set progress={coursescore} where studentid={studentId} and courseid={courseId};''')
         conn.commit()
         #calculate material difficulty to-do
-     
         return redirect(url_for("getMaterial",score=score,studentId=studentId,courseId=courseId,lessonId=lessonId))
     else:
         return render_template('quizresult.html',score=quizScore,studentId=studentId,courseId=courseId,lessonId=lessonId)
@@ -349,7 +345,7 @@ def calscore(score):
 def calCourseScore(courseId):
     conn=db_conn()
     cur = conn.cursor()
-    cur.execute("SELECT progress FROM lesson_progress WHERE lessonid IN (SELECT id FROM lesson WHERE courseid = %s);", (courseId,))
+    cur.execute("SELECT progress FROM lesson_progress WHERE lessonid IN (SELECT id FROM lesson WHERE courseid = %s);", (courseId))
     lesson_progress_list = [float(progress[0]) for progress in cur.fetchall()]
 
     if not lesson_progress_list:
@@ -364,32 +360,32 @@ def calCourseScore(courseId):
     # Ensure the progress is between 0 and 100
     return min(max(course_progress, 0), 100)
 
-@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material/<float:score>',methods=['GET'])
-def getMaterial(studentId, courseId, lessonId,score): 
+@app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['GET'])
+def getMaterial(studentId, courseId, lessonId): 
+    conn=db_conn()
+    cur = conn.cursor()
+    cur.execute(f'''select lp.progress from lesson l join lesson_progress lp on l.id = lp.lessonid where lp.studentid={studentId} and lp.lessonid={lessonId}''')
+    score=cur.fetchone()[0]
     if score > 0.75 :
         difficulty='hard'
     elif score > 0.5 :
         difficulty='medium'
     else :
         difficulty='easy'
-       
-    if request.method == "GET":
-        conn=db_conn()
-        cur = conn.cursor()
-        cur.execute(f'''select learnstyle from student where id={studentId};''')
-        data=cur.fetchone()[0]
-        print("difficulty", difficulty)
-        print("data", data)
 
-        if data == 'visual':
-            cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-        elif data == 'auditory':
-            cur.execute(f'''select auditory from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-        elif data == 'reading' or data == 'kinematics' or data == 'Modular':
-            cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-        material = cur.fetchone()[0]
-        return render_template('material.html')
-    return render_template('material.html' )
+    cur.execute(f'''select learnstyle from student where id={studentId};''')
+    data=cur.fetchone()[0]
+    print("difficulty", difficulty)
+    print("data", data)
+    if data == 'visual':
+        cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+    elif data == 'auditory':
+        cur.execute(f'''select auditory from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+    elif data == 'reading' or data == 'kinematics' or data == 'Modular':
+        cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
+    material = cur.fetchone()[0]
+    print(material)
+    return render_template('material.html',material=material,data=data)
 
 
 @app.route('/insertMaterial/<int:clientId>',methods=['POST','GET'])
