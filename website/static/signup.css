@@ -9,6 +9,7 @@
     margin: 5% 18% 5% 18%;
     padding: 2%;
     gap: 32px;
+    border-radius: 8px;
 }
 
 .header {
@@ -29,7 +30,7 @@
 .body {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 8px;
     flex: 1;
 }
 
@@ -64,4 +65,57 @@
 .error {
     background-color: #fde7e7;
     color: #a80000;
+}
+
+label{
+    font-size: large;
+}
+
+select{
+    height: 32px;
+    font-size: medium;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 0px;
+
+}
+
+select:hover{
+    background-color: rgb(243, 249, 253);
+
+}
+
+input{
+    height: 32px;
+    font-size: small;
+    border-radius: 4px;
+    border-width: 1px;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    border-color: rgb(185, 185, 185);
+}
+
+
+button {
+    /* margin: 0% 35%; */
+    height: 32px;
+    width: 100px;
+    background-color: #0f6cbd;
+    color: #ffffff;
+    border-radius: 4px;
+    border: none;
+}
+
+button:hover {
+    background-color: #115ea3;
+}
+
+
+body{
+    background-color: #ebf3fc;
+    
+}
+
+h2 {
+    color: #0f6cbd;
 }

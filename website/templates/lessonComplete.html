@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Lesson Complete</title>
@@ -12,9 +13,14 @@
             padding: 20px;
         }
 
+        body {
+            background-color: #cfe4fa;
+        }
+
         /* Button styling */
         .course-button {
-            background-color: #4CAF50; /* Green */
+            background-color: #0f6cbd;
+            /* Green */
             color: white;
             padding: 10px 20px;
             border: none;
@@ -23,6 +29,11 @@
             font-size: 16px;
             cursor: pointer;
         }
+
+        button:hover {
+            background-color: #115ea3;
+        }
+
 
         /* Ensure confetti canvas is in the right position */
         #confettiCanvas {
@@ -52,7 +63,7 @@
         }
 
         // Start the confetti effect on page load
-        window.onload = function() {
+        window.onload = function () {
             startConfetti();
         };
     </script>
@@ -61,10 +72,12 @@
     <div class="main-container">
         <h1>Lesson Complete!</h1>
         <p>Congratulations, you've completed the lesson!</p>
-        <p>Your progress is: {{ courseProgress }}%</p>  <!-- Display the student's progress -->
+        <p>Your progress is: {{ courseProgress }}%</p> <!-- Display the student's progress -->
         <!-- Button to redirect to the course page -->
-        <button onclick="window.location.href = window.location.href=`/{{ studentId }}/course/{{ courseId }}`" class="course-button">Back to Course</button>
+        <button onclick="window.location.href = window.location.href=`/{{ studentId }}/course/{{ courseId }}`"
+            class="course-button">Back to Course</button>
     </div>
 
 </body>
+
 </html>
