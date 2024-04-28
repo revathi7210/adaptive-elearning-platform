@@ -285,7 +285,7 @@ def quiz(studentId,courseId,lessonId):
 
         session['score'] += currentscore
 
-        print(session['current_question'],'\t', session['score'])
+        print(session['current_question'],'\t',currentscore,'\t' ,session['score'])
 
         if difficulty == 'easy':
             current_question_data = get_question_data(easy_questions, index[0])
@@ -345,7 +345,7 @@ def calscore(score):
 def calCourseScore(courseId):
     conn=db_conn()
     cur = conn.cursor()
-    cur.execute("SELECT progress FROM lesson_progress WHERE lessonid IN (SELECT id FROM lesson WHERE courseid = %s);", (courseId))
+    cur.execute("SELECT progress FROM lesson_progress WHERE lessonid IN (SELECT id FROM lesson WHERE courseid = %s);", (courseId,))
     lesson_progress_list = [float(progress[0]) for progress in cur.fetchall()]
 
     if not lesson_progress_list:
