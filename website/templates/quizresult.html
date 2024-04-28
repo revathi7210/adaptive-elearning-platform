@@ -10,20 +10,28 @@
     <script>
         function redirectToNewEndpoint(studentId,courseId,lessonId,score) {
             var xhr = new XMLHttpRequest();
-                console.log(score);
-                xhr.open('POST', `/${studentId}/course/${courseId}/${lessonId}/quizresult?quizScore=${score}`);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        console.log('Enrollment successful');
-                        window.location.href = `/${studentId}/course/${courseId}/${lessonId}/material`; /* Redirect endpoint */
+                if (Number(score) > 95)
+                {
+                    window.location.href = `/${studentId}/course/${courseId}/${lessonId}/lessonComplete`; /* Redirect endpoint */
             
-                    } else
-                    {
-                        console.log('Error:', xhr.statusText);
-                    }
-                };
-                xhr.send(JSON.stringify({ score: score, }));
+                }
+                else
+                {
+                    xhr.open('POST', `/${studentId}/course/${courseId}/${lessonId}/quizresult?quizScore=${score}`);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            console.log('Enrollment successful');
+                            window.location.href = `/${studentId}/course/${courseId}/${lessonId}/material`; /* Redirect endpoint */
+                
+                        } else
+                        {
+                            console.log('Error:', xhr.statusText);
+                        }
+                    };
+                    xhr.send(JSON.stringify({ score: score, }));
+                }
+                
         }
     </script>
 </head>
@@ -31,7 +39,6 @@
     <div id="result-container">
         <h2>Quiz Completed!</h2>
         <p>Your score is: {{ score }}</p>
-        
         <!-- Button to redirect to another endpoint -->
         <button onclick="redirectToNewEndpoint('{{ studentId }}', '{{ courseId }}','{{ lessonId }}','{{ score }}')">Go to Next Lesson</button>
     </div>

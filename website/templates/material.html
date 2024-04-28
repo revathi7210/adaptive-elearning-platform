@@ -1,102 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Material</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <link rel="stylesheet" href="/static/material.css">
+    <style>
+        .centered-button {
+            display: none;  /* Initially hidden */
+            position: absolute;
+            top: 50%;  /* Vertical centering */
+            left: 50%;  /* Horizontal centering */
+            transform: translate(-50%, -50%);  /* Proper centering */
+            padding: 10px 20px;  /* Padding for better visual appearance */
+            background-color: #007BFF;  /* Blue background */
+            color: white;  /* White text */
+            border: none;  /* No border */
+            border-radius: 5px;  /* Rounded corners */
+            font-size: 16px;  /* Font size */
+            cursor: pointer;  /* Pointer cursor */
+            z-index: 10;  /* Ensure it's on top */
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Hidden Take Quiz Button, centered -->
+    <div id="takeQuizContainer" class="centered-button">
+        <button onclick= "takeQuiz('{{ studentId }}','{{ courseId }}','{{ lessonId }}')" id="takeQuizBtn">Take Quiz</button>  <!-- The "Take Quiz" button -->
+    </div>
+
+    <!-- Study Material Content -->
     {% if data in ['reading', 'kinematics', 'Modular'] %}
     {% if material %}
         <div class="main">
-            <div">
+            <div>
                 <button id="prevPageBtn" class="navigation-btn">Previous Page</button>
                 <button id="nextPageBtn" class="navigation-btn">Next Page</button>
+            </div>
+            <canvas id="pdfCanvas" data-url="{{ material }}"></canvas>
         </div>
-        <canvas id="pdfCanvas" data-url="{{ material }}"></canvas>
-    </div>
     {% endif %}
     {% elif data == 'visual' %}
     <div class="video-container">
-        <video controls>
+        <video id="studyVideo" controls>
             <source src="{{ material }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
-
     {% elif data == 'auditory' %}
     <div class="media-container">
-        <audio controls>
+        <audio id="studyAudio" controls>
             <source src="{{ material }}" type="audio/mpeg">
             Your browser does not support the audio tag.
         </audio>
     </div>
-
     {% endif %}
 
 </body>
 
+<!-- Script for handling PDF.js and event listeners -->
 <script>
-    // PDF.js script has been loaded, let's start working with it
-    const url = document.getElementById('pdfCanvas').getAttribute('data-url');
-    console.log(url)
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const takeQuizContainer = document.getElementById('takeQuizContainer');
 
-    // const url = 'https://readingm.s3.ap-south-1.amazonaws.com/6979f64718d145a6bcf638992fc534bc.pdf'
-    let currentPage = 1;
-    let pdfInstance = null;
+    if (pdfCanvas) {
+        const url = pdfCanvas.getAttribute('data-url');
+        let currentPage = 1;
+        let pdfInstance = null;
 
-    // Asynchronous download PDF
-    const loadingTask = pdfjsLib.getDocument(url);
-    loadingTask.promise.then(function (pdf) {
-        console.log('PDF loaded');
-        pdfInstance = pdf;
+        const loadingTask = pdfjsLib.getDocument(url);
+        loadingTask.promise.then(function(pdf) {
+            pdfInstance = pdf;
 
-        // Displaying the first page
-        renderPage(currentPage);
-    }, function (reason) {
-        // PDF loading error
-        console.error('Error: ' + reason);
-    });
+            renderPage(currentPage);
 
-    function renderPage(pageNumber) {
-        pdfInstance.getPage(pageNumber).then(function (page) {
-            console.log('Page ' + pageNumber + ' loaded');
+            document.getElementById('prevPageBtn').addEventListener('click', function() {
+                if (pdfInstance && currentPage > 1) {
+                    currentPage--;
+                    renderPage(currentPage);
+                }
+            });
 
-            const scale = 1.5;
-            const viewport = page.getViewport({ scale: scale });
+            document.getElementById('nextPageBtn').addEventListener('click', function() {
+                if (pdfInstance && currentPage < pdfInstance.numPages) {
+                    currentPage++;
+                    renderPage(currentPage);
+                } else if (currentPage >= pdfInstance.numPages) {
+                    // Show the Take Quiz button when reaching the last page
+                    takeQuizContainer.style.display = "block";
+                }
+            });
+        });
 
-            // Prepare canvas using PDF page dimensions
-            const canvas = document.getElementById('pdfCanvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+        function renderPage(pageNumber) {
+            pdfInstance.getPage(pageNumber).then(function(page) {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
 
-            // Render PDF page into canvas context
-            const renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
-            page.render(renderContext);
+                const canvas = pdfCanvas;
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        }
+    }
+
+    const studyVideo = document.getElementById('studyVideo');
+    if (studyVideo) {
+        studyVideo.addEventListener('ended', function() {
+            takeQuizContainer.style.display = "block";  // Show the button at the end of the video
         });
     }
 
-    document.getElementById('prevPageBtn').addEventListener('click', function () {
-        if (pdfInstance && currentPage > 1) {
-            currentPage--;
-            renderPage(currentPage);
-        }
-    });
+    const studyAudio = document.getElementById('studyAudio');
+    if (studyAudio) {
+        studyAudio.addEventListener('ended', function() {
+            takeQuizContainer.style.display = "block";  // Show the button at the end of the audio
+        });
+    }
 
-    document.getElementById('nextPageBtn').addEventListener('click', function () {
-        if (pdfInstance && currentPage < pdfInstance.numPages) {
-            currentPage++;
-            renderPage(currentPage);
+    function takeQuiz(studentId,courseId,lessonId) {
+        window.location.href=`/${studentId}/course/${courseId}/${lessonId}/quiz`/* Redirect endpoint */
+   
         }
-    });
+
+    
+
 </script>
 
 </html>

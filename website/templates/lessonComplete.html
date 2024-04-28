@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson Complete</title>
+    <!-- Include confetti library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.min.js"></script>
+    <style>
+        /* Styling for the main content */
+        .main-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Button styling */
+        .course-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Ensure confetti canvas is in the right position */
+        #confettiCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Confetti effect when the page loads -->
+    <canvas id="confettiCanvas"></canvas>
+    <script>
+        const confettiCanvas = document.getElementById('confettiCanvas');
+
+        function startConfetti() {
+            // Basic confetti effect
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 } // Adjust origin to control the starting position of confetti
+            });
+        }
+
+        // Start the confetti effect on page load
+        window.onload = function() {
+            startConfetti();
+        };
+    </script>
+
+    <!-- Main content displaying student's progress and score -->
+    <div class="main-container">
+        <h1>Lesson Complete!</h1>
+        <p>Congratulations, you've completed the lesson!</p>
+        <p>Your progress is: {{ courseProgress }}%</p>  <!-- Display the student's progress -->
+        <!-- Button to redirect to the course page -->
+        <button onclick="window.location.href = window.location.href=`/{{ studentId }}/course/{{ courseId }}`" class="course-button">Back to Course</button>
+    </div>
+
+</body>
+</html>
