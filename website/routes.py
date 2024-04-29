@@ -65,7 +65,7 @@ def displayFirstQuiz():
         learnstyle = request.form['learnStyle']
         cur.execute(f'''update student set learnstyle='{learnstyle}' where id={studentId};''')
         conn.commit()
-        print(learnstyle)
+        # # print(learnstyle)
         return redirect(url_for('dashboard',studentId=studentId))
     return render_template("firstquiz.html",firstQuiz=firstQuiz)
 
@@ -84,7 +84,7 @@ def login():
             
             studentid=data[0]
             pwd=data[2]
-            #print (studentid, pwd)
+            ## print (studentid, pwd)
             if studentid == None :
                 return "User account Does not exist. Please Signup."
             else :
@@ -128,7 +128,7 @@ def dashboard(studentId):
             cur.execute("SELECT * FROM course")
             not_enrolled_courses = cur.fetchall()        
 
-        print(not_enrolled_courses)
+        # print(not_enrolled_courses)
 
         return render_template('dashboard.html',studentId=studentId,enrolled_courses=enrolled_courses,not_enrolled_courses=not_enrolled_courses)
     elif request.method == 'POST':
@@ -138,7 +138,7 @@ def dashboard(studentId):
         course_id = data.get('courseId')
 
         # Process the course ID as needed
-        print("Received course ID:", course_id)
+        # print("Received course ID:", course_id)
         return redirect(url_for('course'))
 
 
@@ -166,15 +166,15 @@ def course(studentId,courseId):
         
         cur.execute("SELECT l.id, l.lessonname, l.lessondescription FROM lesson l JOIN lesson_progress lp ON l.id=lp.lessonid WHERE lp.progress = 0 AND lp.studentid = %s AND l.courseid = %s", (studentId, courseId,))
         not_attempted_lessons = cur.fetchall()
-        print('0',not_attempted_lessons)
+        # print('0',not_attempted_lessons)
 
         cur.execute("SELECT l.id, l.lessonname, l.lessondescription FROM lesson l JOIN lesson_progress lp ON l.id=lp.lessonid WHERE lp.progress > 0 AND lp.progress < 100 AND lp.studentid = %s AND l.courseid = %s", (studentId, courseId,))
         on_going_lessons = cur.fetchone()
-        print('0-100',on_going_lessons)
+        # print('0-100',on_going_lessons)
 
         cur.execute("SELECT l.id, l.lessonname, l.lessondescription FROM lesson l JOIN lesson_progress lp ON l.id=lp.lessonid WHERE lp.progress = 100 AND lp.studentid = %s AND l.courseid = %s", (studentId, courseId,))
         completed_lessons = cur.fetchall()
-        print('100',completed_lessons)
+        # print('100',completed_lessons)
 
 
         return render_template('course.html',studentId=studentId,courseId=courseId,not_attempted_lessons=not_attempted_lessons,on_going_lessons=on_going_lessons,completed_lessons=completed_lessons)  
@@ -189,7 +189,7 @@ def get_questions(LessonId):
     select_query = f'''SELECT question,choice1,choice2,choice3,choice4,answer,difficulty FROM questionnaire where lessonid={LessonId};'''
     cur.execute(select_query)
     questions = cur.fetchall()
-    # print(questions)
+    # # print(questions)
 
     return questions
 
@@ -292,10 +292,10 @@ def adaptive_algorithm(index, user_answer, correct_answer, difficulty, time_take
         next_difficulty = 'hard'
         index[2] += 1
     
-    print("Index:", index)
-    print("Current Question Score:", question_score)
-    print("New Session Average:", new_sessionavg)
-    print("Next Difficulty:", next_difficulty)
+    # print("Index:", index)
+    # print("Current Question Score:", question_score)
+    # print("New Session Average:", new_sessionavg)
+    # print("Next Difficulty:", next_difficulty)
     
     return question_score, next_difficulty, index
 
@@ -349,7 +349,7 @@ def quiz(studentId,courseId,lessonId):
 
         session['score'] += currentscore
 
-        print("difficulty ",difficulty,"timetaken ",time_taken," questionscore ",currentscore,"sessionscore ",session['score'])   
+        # print("difficulty ",difficulty,"timetaken ",time_taken," questionscore ",currentscore,"sessionscore ",session['score'])   
 
         if difficulty == 'easy':
             current_question_data = get_question_data(easy_questions, index[0])
@@ -390,15 +390,11 @@ def quizresult(studentId,courseId,lessonId):
     if request.method == 'POST':
         score=float(quizScore)
         if score > 95.0:
-            print("hellooooo")
-            cur.execute(f'''UPDATE lesson_progress set progress=100 where studentid={studentId} and lessonid={lessonId};''')
-            conn.commit()
             return redirect(url_for("lessonComplete",studentId=studentId,courseId=courseId,lessonId=lessonId)) 
         else:
             cur.execute(f'''UPDATE lesson_progress set progress={score} where studentid={studentId} and lessonid={lessonId};''')
             conn.commit()
-
-            coursescore=calCourseScore(courseId)
+            coursescore=calCourseScore(courseId,studentId)
             cur.execute(f'''UPDATE course_progress set progress={coursescore} where studentid={studentId} and courseid={courseId};''')
             conn.commit()
             #calculate material difficulty to-do
@@ -407,12 +403,12 @@ def quizresult(studentId,courseId,lessonId):
         return render_template('quizresult.html',score=quizScore,studentId=studentId,courseId=courseId,lessonId=lessonId)
 
 
-def calCourseScore(courseId):
+def calCourseScore(courseId,studentId):
     conn=db_conn()
     cur = conn.cursor()
-    cur.execute("SELECT progress FROM lesson_progress WHERE lessonid IN (SELECT id FROM lesson WHERE courseid = %s);", (courseId,))
+    cur.execute("SELECT progress FROM lesson_progress WHERE lessonid IN (SELECT id FROM lesson WHERE courseid = %s) and studentid = %s;", (courseId,studentId))
     lesson_progress_list = [float(progress[0]) for progress in cur.fetchall()]
-
+    print("lesson progress list ",lesson_progress_list)
     if not lesson_progress_list:
         return 0.0  # No progress if the list is empty
 
@@ -423,7 +419,7 @@ def calCourseScore(courseId):
     course_progress = (total_progress / num_lessons)
 
     # Ensure the progress is between 0 and 100
-    return min(max(course_progress, 0), 100)
+    return course_progress
 
 @app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/lessonComplete',methods=['GET'])
 def lessonComplete(studentId, courseId, lessonId):
@@ -431,9 +427,12 @@ def lessonComplete(studentId, courseId, lessonId):
     cur = conn.cursor()
     cur.execute(f'''UPDATE lesson_progress set progress=100 where studentid={studentId} and lessonid={lessonId};''')
     conn.commit()
+    coursescore=calCourseScore(courseId,studentId)
+    cur.execute(f'''UPDATE course_progress set progress={coursescore} where studentid={studentId} and courseid={courseId};''')
+    conn.commit()
     cur.execute('''SELECT progress FROM course_progress WHERE studentid=%s AND courseid=%s;''', (studentId, courseId))
     courseProgress = cur.fetchone()
-    return render_template("lessonComplete.html",studentId=studentId,courseId=courseId,courseProgress=courseProgress)
+    return render_template("lessonComplete.html",studentId=studentId,courseId=courseId,courseProgress=courseProgress[0])
 
 @app.route('/<int:studentId>/course/<int:courseId>/<int:lessonId>/material',methods=['GET'])
 def getMaterial(studentId, courseId, lessonId): 
