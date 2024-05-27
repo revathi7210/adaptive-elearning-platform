@@ -311,9 +311,9 @@ def quiz(studentId,courseId,lessonId):
     medium_questions = [q for q in questions if q[-1].lower() == 'medium']
     hard_questions = [q for q in questions if q[-1].lower() == 'hard']
 
-    random.shuffle(easy_questions)  # Shuffle the 'easy' questions
-    random.shuffle(medium_questions)  # Shuffle the 'medium' questions
-    random.shuffle(hard_questions)  # Shuffle the 'hard' questions
+    # random.shuffle(easy_questions)  # Shuffle the 'easy' questions
+    # random.shuffle(medium_questions)  # Shuffle the 'medium' questions
+    # random.shuffle(hard_questions)  # Shuffle the 'hard' questions
 
 
     if 'index' not in session:
@@ -362,6 +362,7 @@ def quiz(studentId,courseId,lessonId):
         
         if session['current_question'] == 5: 
             session['score']=session['score']/5 # Assuming there are 5 questions
+            session['current_question'] = 1
             return redirect(url_for('quizresult', quizScore=session['score'],courseId=courseId,studentId=studentId,lessonId=lessonId))
 
         session['current_question'] += 1
