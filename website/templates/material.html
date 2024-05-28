@@ -36,7 +36,7 @@
     </div>
 
     <!-- Study Material Content -->
-    {% if data in ['reading', 'kinematics', 'Modular'] %}
+    {% if data == 'reading' %}
     {% if material %}
         <div class="main">
             <div>
@@ -46,7 +46,7 @@
             <canvas id="pdfCanvas" data-url="{{ material }}"></canvas>
         </div>
     {% endif %}
-    {% elif data == 'visual' %}
+    {% elif data in ['visual', 'kinematics', 'Modular'] %}
     <div class="video-container">
         <video id="studyVideo" controls>
             <source src="{{ material }}" type="video/mp4">
@@ -133,7 +133,6 @@
 
     function takeQuiz(studentId,courseId,lessonId) {
         window.location.href=`/${studentId}/course/${courseId}/${lessonId}/quiz`/* Redirect endpoint */
-   
         }
 
     
