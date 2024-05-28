@@ -205,7 +205,7 @@ def calculate_score(learning_style, difficulty, time_taken, is_correct):
     correctness_weight = 0.7  # Highest weight for correctness
 
     # Maximum time in seconds for normalization
-    MAX_TIME = 60
+    MAX_TIME = 30
     # Cap the time taken at MAX_TIME
     if time_taken > MAX_TIME:
         time_taken = MAX_TIME
@@ -363,6 +363,8 @@ def quiz(studentId,courseId,lessonId):
         if session['current_question'] == 5: 
             session['score']=session['score']/5 # Assuming there are 5 questions
             session['current_question'] = 1
+            session['score'] = 0
+            session['currentscore'] = 0
             return redirect(url_for('quizresult', quizScore=session['score'],courseId=courseId,studentId=studentId,lessonId=lessonId))
 
         session['current_question'] += 1
