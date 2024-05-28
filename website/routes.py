@@ -452,11 +452,11 @@ def getMaterial(studentId, courseId, lessonId):
     data=cur.fetchone()[0]
     print("difficulty", difficulty)
     print("data", data)
-    if data == 'visual':
+    if data == 'visual' or data == 'kinematics' or data == 'Modular':
         cur.execute(f'''select visual from material where difficulty='{difficulty}' and lessonid={lessonId};''')
     elif data == 'auditory':
         cur.execute(f'''select auditory from material where difficulty='{difficulty}' and lessonid={lessonId};''')
-    elif data == 'reading' or data == 'kinematics' or data == 'Modular':
+    elif data == 'reading':
         cur.execute(f'''select reading from material where difficulty='{difficulty}' and lessonid={lessonId};''')
     material = cur.fetchone()[0]
     print(material)
