@@ -1,6 +1,6 @@
 # 🧠 Adaptive E-Learning Platform
 
-A personalized learning platform that adapts quiz difficulty and study material based on the user's performance and learning style. Built as a final-year undergraduate project, this system provides a guided learning experience using rule-based logic—without relying on machine learning.
+A personalized learning platform that adapts quiz difficulty and study material based on the user's performance and learning style. Built as a final-year undergraduate project, this system provides a guided learning experience using rule-based logic.
 
 ---
 
